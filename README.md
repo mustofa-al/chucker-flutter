@@ -105,6 +105,22 @@ But you know, because this kind of notification depend on `flutter_local_notific
 * Json request and responses in tree form
 * Json request and response in pretty json format
 * Image URL preview
+* `ChuckerHttpLoggingInterceptor` for better readability of http request and response sent from client. To use this just add this interceptor in your `ChopperClient`
+
+```dart
+final exampleClient = ChopperClient(
+  services: [
+    _$ChopperApiService(),
+  ],
+  interceptors: [
+    ChuckerHttpLoggingInterceptor() //This for logging,
+    ChuckerChopperInterceptor(),
+  ],
+);
+```
+
+![image](https://user-images.githubusercontent.com/44249868/206827243-e97a9465-b165-4af8-96a1-d48ea871164e.png)
+
 
 ### Libraries
 

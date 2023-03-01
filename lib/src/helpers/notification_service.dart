@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chucker_flutter/src/view/helper/chucker_ui_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,11 @@ class NotificationService {
   static Future<void> init({
     required NavigatorObserver navigatorObserver,
   }) async {
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    unawaited(flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestPermission());
     const initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
