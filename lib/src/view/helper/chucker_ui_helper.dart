@@ -10,6 +10,7 @@ import 'package:chucker_flutter/src/view/helper/chucker_button.dart';
 import 'package:chucker_flutter/src/view/helper/colors.dart';
 import 'package:chucker_flutter/src/view/widgets/notification.dart'
     as notification;
+import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -151,15 +152,21 @@ class ChuckerUiHelper {
         builder: (context) => MaterialApp(
           key: const Key('chucker_material_app'),
           debugShowCheckedModeBanner: false,
-          localizationsDelegates: Localization.localizationsDelegates,
+          localizationsDelegates: const [
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+            DefaultCupertinoLocalizations.delegate,
+          ],
           supportedLocales: Localization.supportedLocales,
           locale: Localization.currentLocale,
           theme: ThemeData(
             tabBarTheme: TabBarTheme(
               labelColor: Colors.white,
-              labelStyle: context.textTheme.bodyText1,
+              labelStyle: context.textTheme.bodySmall,
             ),
-            backgroundColor: primaryColor,
+            colorScheme: context.theme.colorScheme.copyWith(
+              background: Colors.white,
+            ),
           ),
           home: const ChuckerPage(),
         ),
