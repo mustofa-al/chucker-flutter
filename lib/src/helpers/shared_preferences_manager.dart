@@ -8,16 +8,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 ///[SharedPreferencesManager] handles storage of chucker data on user's disk
 class SharedPreferencesManager {
-  SharedPreferencesManager._() {
-    getSettings();
+  SharedPreferencesManager._(bool initData) {
+    if (initData) {
+      getSettings();
+    }
   }
 
   static SharedPreferencesManager? _sharedPreferencesManager;
 
   ///[getInstance] returns the singleton object of [SharedPreferencesManager]
   // ignore: prefer_constructors_over_static_methods
-  static SharedPreferencesManager getInstance() {
-    return _sharedPreferencesManager ??= SharedPreferencesManager._();
+  static SharedPreferencesManager getInstance({bool initData = true}) {
+    return _sharedPreferencesManager ??= SharedPreferencesManager._(initData);
   }
 
   static const String _kApiResponses = 'api_responses';
@@ -56,7 +58,7 @@ class SharedPreferencesManager {
       return apiResponses;
     }
 
-    final list = jsonDecode(json);
+    final list = jsonDecode(json) as List<dynamic>;
 
     for (final item in list) {
       apiResponses.add(ApiResponse.fromJson(item as Map<String, dynamic>));
@@ -137,7 +139,7 @@ class SharedPreferencesManager {
       return ApiResponse.mock();
     }
 
-    final list = jsonDecode(json);
+    final list = jsonDecode(json) as List<dynamic>;
 
     for (final item in list) {
       apiResponses.add(ApiResponse.fromJson(item as Map<String, dynamic>));

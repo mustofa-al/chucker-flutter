@@ -116,7 +116,7 @@ class _NotificationState extends State<Notification>
                   Text(
                     widget.statusCode.toString(),
                     textAlign: TextAlign.center,
-                    style: context.textTheme.bodyText1!.toBold(),
+                    style: context.textTheme.bodyLarge!.toBold(),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -126,14 +126,14 @@ class _NotificationState extends State<Notification>
                       children: [
                         Text(
                           widget.method.toUpperCase(),
-                          style: context.textTheme.bodyText2!
+                          style: context.textTheme.bodyMedium!
                               .toBold()
                               .withColor(methodColor(widget.method)),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           widget.path,
-                          style: context.textTheme.caption,
+                          style: context.textTheme.bodySmall,
                         ),
                       ],
                     ),
@@ -162,7 +162,7 @@ class _NotificationState extends State<Notification>
       widget.requestTime,
     );
     await ChuckerFlutter.navigatorObserver.navigator?.push(
-      MaterialPageRoute(builder: (_) => ApiDetailsPage(api: api)),
+      MaterialPageRoute<dynamic>(builder: (_) => ApiDetailsPage(api: api)),
     );
   }
 

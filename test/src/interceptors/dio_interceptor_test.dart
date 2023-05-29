@@ -7,18 +7,16 @@ import 'package:http_mock_adapter/http_mock_adapter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences.setMockInitialValues({});
-  final _dio = Dio();
-  late final SharedPreferencesManager _sharedPreferencesManager;
+  final dio = Dio();
+  late final SharedPreferencesManager sharedPreferencesManager;
 
-  late final DioAdapter _dioAdapter;
+  late final DioAdapter dioAdapter;
 
-  const _mockedSuccessResponse = {'id': 1};
-  const _mockedErrorResponse = {'email': 'email is invalid'};
+  const mockedSuccessResponse = {'id': 1};
+  const mockedErrorResponse = {'email': 'email is invalid'};
 
-  const _successPath = '/success';
-  const _failPath = '/fail';
+  const successPath = '/success';
+  const failPath = '/fail';
 
   final formData = FormData.fromMap(
     {
@@ -28,17 +26,19 @@ void main() {
   );
 
   setUpAll(() {
-    _dio.interceptors.add(ChuckerDioInterceptor());
-    _dioAdapter = DioAdapter(dio: _dio);
-    _dio.httpClientAdapter = _dioAdapter;
-    _sharedPreferencesManager = SharedPreferencesManager.getInstance();
+    dio.interceptors.add(ChuckerDioInterceptor());
+    dioAdapter = DioAdapter(dio: dio);
+    dio.httpClientAdapter = dioAdapter;
+    sharedPreferencesManager = SharedPreferencesManager.getInstance(
+      initData: false,
+    );
 
-    _dioAdapter
-      ..onGet(_successPath, (s) => s.reply(200, _mockedSuccessResponse))
-      ..onGet(_failPath, (s) => s.reply(400, _mockedErrorResponse))
+    dioAdapter
+      ..onGet(successPath, (s) => s.reply(200, mockedSuccessResponse))
+      ..onGet(failPath, (s) => s.reply(400, mockedErrorResponse))
       ..onPost(
-        _successPath,
-        (s) => s.reply(200, _mockedSuccessResponse),
+        successPath,
+        (s) => s.reply(200, mockedSuccessResponse),
         data: formData,
       );
   });
@@ -48,13 +48,13 @@ void main() {
     () async {
       SharedPreferences.setMockInitialValues({});
 
-      await _dio.get(_successPath);
+      await dio.get<dynamic>(successPath);
 
-      final responses = await _sharedPreferencesManager.getAllApiResponses();
+      final responses = await sharedPreferencesManager.getAllApiResponses();
 
       expect(responses.length, 1);
       expect(responses.first.statusCode, 200);
-      expect(responses.first.body, {'data': _mockedSuccessResponse});
+      expect(responses.first.body, mockedSuccessResponse);
     },
   );
 
@@ -62,15 +62,15 @@ void main() {
     SharedPreferences.setMockInitialValues({});
 
     try {
-      await _dio.get(_failPath);
+      await dio.get<dynamic>(failPath);
       // ignore: empty_catches
     } catch (e) {}
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.length, 1);
     expect(responses.first.statusCode, 400);
-    expect(responses.first.body, {'data': _mockedErrorResponse});
+    expect(responses.first.body, mockedErrorResponse);
   });
 
   test(
@@ -79,12 +79,12 @@ void main() {
     ChuckerFlutter.isDebugMode = false;
 
     //For success request
-    await _dio.get(_successPath);
+    await dio.get<dynamic>(successPath);
     expect(ChuckerUiHelper.notificationShown, false);
 
     //For failure request
     try {
-      await _dio.get(_failPath);
+      await dio.get<dynamic>(failPath);
       // ignore: empty_catches
     } catch (e) {}
     expect(ChuckerUiHelper.notificationShown, false);
@@ -96,7 +96,7 @@ void main() {
       'When request has multippart body, its file details should be added'
       ' in api response model', () async {
     SharedPreferences.setMockInitialValues({});
-    await _dio.post(_successPath, data: formData);
+    await dio.post<dynamic>(successPath, data: formData);
 
     const prettyJson = '''
 {
@@ -110,7 +110,7 @@ void main() {
      ]
 }''';
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.first.prettyJsonRequest, prettyJson);
   });

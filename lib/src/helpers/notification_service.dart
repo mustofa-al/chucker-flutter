@@ -25,10 +25,12 @@ class NotificationService {
     required NavigatorObserver navigatorObserver,
   }) async {
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    unawaited(flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestPermission());
+    unawaited(
+      flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestPermission(),
+    );
     const initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 

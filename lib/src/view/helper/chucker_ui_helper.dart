@@ -7,7 +7,6 @@ import 'package:chucker_flutter/src/localization/localization.dart';
 import 'package:chucker_flutter/src/models/settings.dart';
 import 'package:chucker_flutter/src/view/chucker_page.dart';
 import 'package:chucker_flutter/src/view/helper/chucker_button.dart';
-import 'package:chucker_flutter/src/view/helper/colors.dart';
 import 'package:chucker_flutter/src/view/widgets/notification.dart'
     as notification;
 import 'package:flutter/cupertino.dart';
@@ -75,10 +74,10 @@ class ChuckerUiHelper {
           payload: '',
         );
       } else {
-        final _entry =
+        final entry =
             _createOverlayEntry(method, statusCode, path, requestTime);
-        _overlayEntries.add(_entry);
-        overlay?.insert(_entry);
+        _overlayEntries.add(entry);
+        overlay?.insert(entry);
         notificationShown = true;
       }
       return true;
@@ -148,7 +147,7 @@ class ChuckerUiHelper {
   static void showChuckerScreen() {
     SharedPreferencesManager.getInstance().getSettings();
     ChuckerFlutter.navigatorObserver.navigator!.push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => MaterialApp(
           key: const Key('chucker_material_app'),
           debugShowCheckedModeBanner: false,

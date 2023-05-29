@@ -91,9 +91,9 @@ class ChuckerHttpClient extends BaseClient {
   Future<void> _saveResponse(
     BaseRequest request,
     List<int> bytes,
-    final int statusCode,
-    final double contentLength,
-    final String contentType,
+    int statusCode,
+    double contentLength,
+    String contentType,
   ) async {
     dynamic requestBody = '';
     dynamic responseBody = '';
@@ -113,7 +113,7 @@ class ChuckerHttpClient extends BaseClient {
 
     await SharedPreferencesManager.getInstance().addApiResponse(
       ApiResponse(
-        body: {'data': responseBody},
+        body: responseBody,
         path: request.url.path,
         baseUrl: request.url.origin,
         method: request.method,

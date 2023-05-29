@@ -9,85 +9,85 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences.setMockInitialValues({});
-  late final ChuckerHttpClient _client;
+  late final ChuckerHttpClient client;
 
-  const _mockedSuccessResponse = {'id': 1};
-  const _mockedErrorResponse = {'email': 'email is invalid'};
+  const mockedSuccessResponse = {'id': 1};
+  const mockedErrorResponse = {'email': 'email is invalid'};
 
-  const _baseUrl = 'https://www.example.com';
-  const _successPath = '/success';
-  const _failPath = '/fail';
-  const _internalErrorPath = '/internal-error';
+  const baseUrl = 'https://www.example.com';
+  const successPath = '/success';
+  const failPath = '/fail';
+  const internalErrorPath = '/internal-error';
 
-  final _mockClient = MockClient((request) async {
-    if (request.url.path == _successPath) {
-      return Response(jsonEncode(_mockedSuccessResponse), 200);
+  final mockClient = MockClient((request) async {
+    if (request.url.path == successPath) {
+      return Response(jsonEncode(mockedSuccessResponse), 200);
     }
-    if (request.url.path == _internalErrorPath) {
+    if (request.url.path == internalErrorPath) {
       return Response(jsonEncode({'error': 'something went wrong'}), 500);
     }
-    return Response(jsonEncode(_mockedErrorResponse), 400);
+    return Response(jsonEncode(mockedErrorResponse), 400);
   });
 
-  late final _MyChuckerHttpClient _myChuckerHttpClient;
+  late final _MyChuckerHttpClient myChuckerHttpClient;
 
-  late final SharedPreferencesManager _sharedPreferencesManager;
+  late final SharedPreferencesManager sharedPreferencesManager;
 
   setUpAll(() {
-    _client = ChuckerHttpClient(_mockClient);
-    _sharedPreferencesManager = SharedPreferencesManager.getInstance();
-    _myChuckerHttpClient = _MyChuckerHttpClient(_mockClient);
+    client = ChuckerHttpClient(mockClient);
+    sharedPreferencesManager = SharedPreferencesManager.getInstance(
+      initData: false,
+    );
+    myChuckerHttpClient = _MyChuckerHttpClient(mockClient);
   });
   test('Response should be saved in shared preferences when call succeeds',
       () async {
     SharedPreferences.setMockInitialValues({});
-    await _client.get(Uri.parse('$_baseUrl$_successPath'));
+    await client.get(Uri.parse('$baseUrl$successPath'));
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.length, 1);
     expect(responses.first.statusCode, 200);
-    expect(responses.first.body, {'data': _mockedSuccessResponse});
+    expect(responses.first.body, mockedSuccessResponse);
   });
 
   test('Error should be saved in shared preferences when call fails', () async {
     SharedPreferences.setMockInitialValues({});
-    await _client.get(Uri.parse('$_baseUrl$_failPath'));
+    await client.get(Uri.parse('$baseUrl$failPath'));
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.length, 1);
     expect(responses.first.statusCode, 400);
-    expect(responses.first.body, {'data': _mockedErrorResponse});
+    expect(responses.first.body, mockedErrorResponse);
   });
 
   test('Request data should be intercepted when user calls onRequest',
       () async {
     SharedPreferences.setMockInitialValues({});
-    await _myChuckerHttpClient.get(Uri.parse('$_baseUrl$_successPath'));
+    await myChuckerHttpClient.get(Uri.parse('$baseUrl$successPath'));
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
     expect(responses.length, 1);
     expect(responses.first.headers, '{my-token: token}');
   });
 
   test('Response data should be accessible when user calls onResponse',
       () async {
-    expect(_myChuckerHttpClient.statusCode, 200);
+    expect(myChuckerHttpClient.statusCode, 200);
     SharedPreferences.setMockInitialValues({});
-    await _myChuckerHttpClient.get(Uri.parse('$_baseUrl$_internalErrorPath'));
+    await myChuckerHttpClient.get(Uri.parse('$baseUrl$internalErrorPath'));
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
     expect(responses.length, 1);
-    expect(_myChuckerHttpClient.statusCode, 500);
+    expect(myChuckerHttpClient.statusCode, 500);
   });
   test(
       'When UI is running in release mode and showOnRelease is false'
       ' notification should not be shown', () async {
     ChuckerFlutter.isDebugMode = false;
-    await _myChuckerHttpClient.get(Uri.parse('$_baseUrl$_internalErrorPath'));
+    await myChuckerHttpClient.get(Uri.parse('$baseUrl$internalErrorPath'));
     ChuckerFlutter.isDebugMode = true;
     expect(ChuckerUiHelper.notificationShown, false);
   });
@@ -97,8 +97,8 @@ void main() {
     final request = {
       'title': 'foo',
     };
-    await _myChuckerHttpClient.post(
-      Uri.parse('$_baseUrl$_successPath'),
+    await myChuckerHttpClient.post(
+      Uri.parse('$baseUrl$successPath'),
       body: jsonEncode(request),
     );
 
@@ -109,7 +109,7 @@ void main() {
      }
 }''';
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.first.prettyJsonRequest, prettyJson);
   });
@@ -120,7 +120,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final request = MultipartRequest(
       'POST',
-      Uri.parse('$_baseUrl$_successPath'),
+      Uri.parse('$baseUrl$successPath'),
     );
     request.fields.addAll(
       {'key': '123'},
@@ -132,7 +132,7 @@ void main() {
         filename: 'a.png',
       ),
     );
-    await _myChuckerHttpClient.send(request);
+    await myChuckerHttpClient.send(request);
 
     const prettyJson = '''
 {
@@ -146,7 +146,7 @@ void main() {
      ]
 }''';
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.first.prettyJsonRequest, prettyJson);
   });

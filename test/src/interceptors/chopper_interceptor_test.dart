@@ -10,59 +10,59 @@ import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences.setMockInitialValues({});
-  const _mockedSuccessResponse = {'id': 1};
+  const mockedSuccessResponse = {'id': 1};
 
-  const _baseUrl = 'https://www.example.com';
-  const _successPath = '/success';
-  const _failPath = '/fail';
-  const _internalErrorPath = '/internal-error';
+  const baseUrl = 'https://www.example.com';
+  const successPath = '/success';
+  const failPath = '/fail';
+  const internalErrorPath = '/internal-error';
 
-  final _mockClient = MockClient((request) async {
-    if (request.url.path == _successPath) {
+  final mockClient = MockClient((request) async {
+    if (request.url.path == successPath) {
       return Response(
-        jsonEncode(_mockedSuccessResponse),
+        jsonEncode(mockedSuccessResponse),
         200,
         request: request,
       );
     }
-    if (request.url.path == _internalErrorPath) {
+    if (request.url.path == internalErrorPath) {
       return Response(jsonEncode({'error': 'something went wrong'}), 500);
     }
     return Response(emptyString, 400);
   });
 
-  late final _chopperClient = chopper.ChopperClient(
-    baseUrl: Uri.parse(_baseUrl),
-    client: _mockClient,
+  late final chopperClient = chopper.ChopperClient(
+    baseUrl: baseUrl,
+    client: mockClient,
     interceptors: [
       ChuckerChopperInterceptor(),
     ],
   );
 
-  late final SharedPreferencesManager _sharedPreferencesManager;
+  late final SharedPreferencesManager sharedPreferencesManager;
 
   setUpAll(() {
-    _sharedPreferencesManager = SharedPreferencesManager.getInstance();
+    sharedPreferencesManager = SharedPreferencesManager.getInstance(
+      initData: false,
+    );
   });
   test('Response should be saved in shared preferences when call succeeds',
       () async {
     SharedPreferences.setMockInitialValues({});
-    await _chopperClient.get(Uri.parse(_successPath));
+    await chopperClient.get<dynamic, dynamic>(successPath);
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.length, 1);
     expect(responses.first.statusCode, 200);
-    expect(responses.first.body, {'data': _mockedSuccessResponse});
+    expect(responses.first.body, mockedSuccessResponse);
   });
 
   test('Error should be saved in shared preferences when call fails', () async {
     SharedPreferences.setMockInitialValues({});
-    await _chopperClient.get(Uri.parse(_failPath));
+    await chopperClient.get<dynamic, dynamic>(failPath);
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.length, 1);
     expect(responses.first.statusCode, 400);
@@ -114,8 +114,8 @@ void main() {
     final request = {
       'title': 'foo',
     };
-    await _chopperClient.post(
-      Uri.parse(_successPath),
+    await chopperClient.post<dynamic, dynamic>(
+      successPath,
       body: jsonEncode(request),
     );
 
@@ -126,7 +126,7 @@ void main() {
      }
 }''';
 
-    final responses = await _sharedPreferencesManager.getAllApiResponses();
+    final responses = await sharedPreferencesManager.getAllApiResponses();
 
     expect(responses.first.prettyJsonRequest, prettyJson);
   });

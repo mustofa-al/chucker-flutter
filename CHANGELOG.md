@@ -108,3 +108,17 @@
 ## 1.4.2
 
 * Dependencies update
+
+## 1.4.3
+
+* Dependencies update
+
+## 1.5.0
+
+* Dependencies update
+* Minor issues fixed
+
+## 1.5.1
+
+* Fix: Error response parsing failed in dio interceptor
+* Fix: Error response parsing failed in http logging interceptor
