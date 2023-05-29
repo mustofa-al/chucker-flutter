@@ -15,8 +15,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_local_notifications: ^13.0.0
-  flutter_localizations:
-    sdk: flutter
+  # flutter_localizations:
+  #   sdk: flutter
   http: ^0.13.5
   http_mock_adapter: ^0.4.2
   localization: ^2.1.0
